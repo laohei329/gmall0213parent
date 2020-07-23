@@ -1,6 +1,7 @@
 package com.sun.gmall2020.realtime.app
 
 import java.lang
+import java.text.SimpleDateFormat
 import java.util.Properties
 
 import com.alibaba.fastjson.{JSON, JSONObject}
@@ -14,24 +15,44 @@ import redis.clients.jedis.Jedis
 import scala.collection.mutable.ListBuffer
 
 
-
-
 object DauApp {
   def main(args: Array[String]): Unit = {
-    val sparkConf: SparkConf = new SparkConf().setMaster("local[4]").setAppName("dau_app")
+    val sparkConf: SparkConf = new SparkConf().setMaster("local[*]").setAppName("dau_app")
     val ssc: StreamingContext = new StreamingContext(sparkConf, Seconds(5))
-    val groupId="dau_group"
-    val inputDS: InputDStream[ConsumerRecord[String, String]] = MyKafkaUtil.getKafkaStream("GMALL_START", ssc,groupId)
-
-    //todo 先将log字符串转变成jsonobject
-    val JsonObjectDS: DStream[JSONObject] = inputDS.map {
+    val groupId = "dau_group"
+    val inputDS: InputDStream[ConsumerRecord[String, String]] = MyKafkaUtil.getKafkaStream("GMALL_START", ssc, groupId)
+    //先得到JSONObject
+    val jsonObjectDS: DStream[JSONObject] = inputDS.map {
       record => {
         val jsonStr: String = record.value()
         val jsonObject: JSONObject = JSON.parseObject(jsonStr)
         jsonObject
       }
     }
-    val startObject: DStream[JSONObject] = JsonObjectDS.transform {
+    val startUpObjs: DStream[JSONObject] = jsonObjectDS.mapPartitions {
+      jsonObjIter => {
+        val objList: List[JSONObject] = jsonObjIter.toList
+        println("过滤之前：" + objList.size)
+        val startObjList: ListBuffer[JSONObject] = new ListBuffer[JSONObject]
+        val jedis: Jedis = JedisUtil.getJedisClient
+        for (obj <- objList) {
+          val mid: String = obj.getJSONObject("common").getString("mid")
+          val ts: lang.Long = obj.getLong("ts")
+          val time: String = new SimpleDateFormat("yyyy-MM-dd").format(ts)
+          val backLong: lang.Long = jedis.sadd("dau:" + time, mid)
+          if (backLong == 1L) {
+            startObjList.append(obj)
+          }
+        }
+        jedis.close()
+        println("过滤之后：" + startObjList.size)
+        startObjList.toIterator
+      }
+    }
+    startUpObjs.print(1000)
+
+/*
+    val startObject: DStream[JSONObject] = jsonObjectDS.transform {
       rdd => {
         rdd.mapPartitions(
           jsonObject => {
@@ -50,6 +71,7 @@ object DauApp {
       }
     }
     startObject
+*/
 
     ssc.start()
     ssc.awaitTermination()
