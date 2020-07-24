@@ -2,9 +2,9 @@ package com.sun.gmall2020.realtime.util
 
 import java.util.Properties
 
-import redis.clients.jedis.{Jedis, JedisPool, JedisPoolConfig}
+import redis.clients.jedis.{JedisPool, JedisPoolConfig}
 
-object JedisUtil {
+object RedisUtil {
   var jedisPool:JedisPool=null;
   def getJedisClient ={
     if (jedisPool==null){
