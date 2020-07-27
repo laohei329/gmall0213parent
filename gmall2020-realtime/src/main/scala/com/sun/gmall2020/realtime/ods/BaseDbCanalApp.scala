@@ -45,7 +45,7 @@ object BaseDbCanalApp {
     val jsonObjDstream: DStream[JSONObject] = recordDstream.map {
       record =>
         val jsonStr: String = record.value()
-        println("jsonStr"+jsonStr)
+       // println("jsonStr"+jsonStr)
         val jsonObj: JSONObject = JSON.parseObject(jsonStr)
         jsonObj
     }
@@ -57,11 +57,12 @@ object BaseDbCanalApp {
         val tableName: String = jsonObj.getString("table")
         val optType: String = jsonObj.getString("type")
         val dataArray: JSONArray = jsonObj.getJSONArray("data")
+        //println(tableName+":"+optType+":===="+dataArray.toJSONString)
         val topic = "ODS_" + tableName.toUpperCase
         if ((tableName.equals("order_info") && optType.equals("INSERT"))
           || (tableName.equals("order_detail") && optType.equals("INSERT"))
         ) {
-          for (i <- 0 to dataArray.size() - 1) {
+            for (i <- 0 to dataArray.size() - 1) {
             val jsonData: String = dataArray.getString(i)
             //发送kafka主题 讲消息发向ods层
            MyKafkaSink.send(topic, jsonData)
