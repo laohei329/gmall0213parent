@@ -1,13 +1,13 @@
-package com.sun.publisher;
+package com.sun.publiser;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Gmall2020PublisherApplication {
+public class GamllPubliserApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Gmall2020PublisherApplication.class, args);
+        SpringApplication.run(GamllPubliserApplication.class, args);
     }
 
 }

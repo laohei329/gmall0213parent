@@ -108,7 +108,7 @@ object DauApp {
 
           }
           val today= new SimpleDateFormat("yyyyMMdd").format(new Date())
-          MyEsUtil.bulkSave(dauWithIdList,"gmall_dau_info_"+today)
+          MyEsUtil.bulkSave(dauWithIdList,"gmall_dau_info_0213_"+today)
 
       }
       OffsetManger.saveOffset(topic,groupId,offsetRange)// 要在driver中执行 周期性 每批执行一次
