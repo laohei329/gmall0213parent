@@ -65,7 +65,6 @@ object BaseDbCanalApp {
             for (i <- 0 to dataArray.size() - 1) {
             val jsonData: String = dataArray.getString(i)
             //发送kafka主题 讲消息发向ods层
-
            MyKafkaSink.send(topic, jsonData)
           }
         }
