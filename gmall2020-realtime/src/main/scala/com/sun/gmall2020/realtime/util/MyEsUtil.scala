@@ -66,7 +66,7 @@ object MyEsUtil {
     jestClient.close()
   }
 
-  //批次化操作
+  //批次化操作   indexName 表名 list存入表中的内容
   def bulkSave(list: List[(Any, String)], indexName: String) = {
 
     if (list != null && list.size > 0) {
