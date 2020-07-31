@@ -145,7 +145,7 @@ object OrderInfoApp {
     // 1  更新  用户状态
     // 2  存储olap  用户分析    可选
     // 3  推kafka 进入下一层处理   可选
-
+    orderInfoWithProvinceDstream.print(1000)
     orderInfoWithProvinceDstream.foreachRDD { rdd =>
       rdd.cache()
       val userStateRDD: RDD[UserState] = rdd.map(orderInfo => UserState(orderInfo.user_id.toString, "1"))
@@ -158,12 +158,11 @@ object OrderInfoApp {
       //存储olap 用户分析
       rdd.foreachPartition { orderInfoItr =>
         val orderInfoList: List[OrderInfo] = orderInfoItr.toList
-        println(orderInfoList)
         val orderInfoListMap: List[(OrderInfo, String)] = orderInfoList.map(orderInfo => (orderInfo, orderInfo.user_id.toString))
-         val dateStr=new SimpleDateFormat("yyyyMMdd").format(new Date())
-        println("============"+dateStr)
-        //如果要进行分析课发送到es
-        MyEsUtil.bulkSave(orderInfoListMap,"gmall0213_order_info_"+dateStr )
+//         val dateStr=new SimpleDateFormat("yyyyMMdd").format(new Date())
+//        println("============"+dateStr)
+//        //如果要进行分析课发送到es
+//        MyEsUtil.bulkSave(orderInfoListMap,"gmall0213_order_info_"+dateStr )
 
         for ((orderInfo, userId) <- orderInfoListMap) {
           //将数据发送到kafka
